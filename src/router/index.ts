@@ -49,7 +49,7 @@ const router = createRouter({
 });
 
 // Guard logic
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, _from, next) => {
   if (to.meta.requiresAuth) {
     try {
       const { data } = await api.get<AuthCheckResponse>("/api/check");
