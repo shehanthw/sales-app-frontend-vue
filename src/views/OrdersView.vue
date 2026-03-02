@@ -74,7 +74,7 @@
           <div
             v-for="(item, idx) in form.items"
             :key="idx"
-            class="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-4 items-end mb-4 p-4 md:p-3 bg-gray-50 rounded-lg border border-gray-100 md:border-none shadow-sm md:shadow-none"
+            class="grid grid-cols-1 mb-5 lg:mb-0 md:grid-cols-4 gap-4 md:gap-2 items-end p-4 md:p-3 bg-gray-50 rounded-lg border border-gray-100 md:border-none shadow-sm md:shadow-none"
           >
             <div class="grid gap-1">
               <label class="text-xs font-bold uppercase text-gray-500 md:hidden"
@@ -112,10 +112,10 @@
               </p>
             </div>
 
-            <div class="flex justify-end md:justify-start">
+            <div class="grid gap-1">
               <button
                 @click="removeItem(idx)"
-                class="w-full md:w-auto px-4 py-2 md:p-0 bg-red-50 md:bg-transparent text-red-600 hover:text-red-800 text-sm font-medium rounded-md transition-colors"
+                class="mt-7 text-red-600 hover:text-red-800 text-sm font-medium border border-red-800 rounded-md px-3 py-1 transition-colors self-start"
               >
                 Remove
               </button>
@@ -124,7 +124,7 @@
 
           <button
             @click="addItem"
-            class="w-full md:w-auto btn-outline mt-4 border-2 border-dashed border-gray-300 py-3 hover:border-blue-500 hover:bg-blue-50 transition-all rounded-lg"
+            class="w-full md:w-auto btn-outline mt-5 border-2 border-dashed border-gray-300 py-3 hover:border-blue-500 hover:bg-blue-50 transition-all rounded-lg"
           >
             + Add item
           </button>
@@ -132,77 +132,80 @@
 
         <!-- Payments -->
         <div>
-  <h4 class="font-semibold mb-4 text-lg">Payments</h4>
+          <h4 class="font-semibold mb-4 text-lg">Payments</h4>
 
-  <div
-    v-for="(payment, idx) in form.payments"
-    :key="idx"
-    class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-100 shadow-sm md:shadow-none"
-  >
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
-      
-      <div class="flex flex-col gap-1">
-        <label class="text-xs font-bold uppercase text-gray-500">Amount</label>
-        <input
-          v-model.number="payment.amount"
-          type="number"
-          step="0.01"
-          min="0"
-          class="text-primary w-full border-gray-300 rounded-md focus:ring-blue-500"
-        />
-      </div>
+          <div
+            v-for="(payment, idx) in form.payments"
+            :key="idx"
+            class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-100 shadow-sm md:shadow-none"
+          >
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-start">
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold uppercase text-gray-500"
+                  >Amount</label
+                >
+                <input
+                  v-model.number="payment.amount"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  class="text-primary w-full border-gray-300 rounded-md focus:ring-blue-500"
+                />
+              </div>
 
-      <div class="flex flex-col gap-1">
-        <label class="text-xs font-bold uppercase text-gray-500">Date</label>
-        <input
-          v-model="payment.payment_date"
-          type="date"
-          class="text-primary w-full border-gray-300 rounded-md focus:ring-blue-500"
-        />
-      </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold uppercase text-gray-500"
+                  >Date</label
+                >
+                <input
+                  v-model="payment.payment_date"
+                  type="date"
+                  class="text-primary w-full border-gray-300 rounded-md focus:ring-blue-500"
+                />
+              </div>
 
-      <div class="flex flex-col gap-1">
-        <label class="text-xs font-bold uppercase text-gray-500">Method</label>
-        <select
-          v-model="payment.payment_method"
-          class="text-primary w-full border-gray-300 rounded-md focus:ring-blue-500"
-        >
-          <option value="cash">Cash</option>
-          <option value="card">Card</option>
-          <option value="bank_transfer">Bank Transfer</option>
-          <option value="check">Check</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-xs font-bold uppercase text-gray-500"
+                  >Method</label
+                >
+                <select v-model="payment.payment_method" class="text-primary">
+                  <option value="cash">Cash</option>
+                  <option value="card">Card</option>
+                  <option value="bank_transfer">Bank Transfer</option>
+                  <option value="check">Check</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
 
-      <div class="flex items-end h-full">
-        <button
-          @click="removePayment(idx)"
-          class="w-full md:w-auto text-red-600 hover:text-red-800 text-sm font-medium py-2 md:py-0 text-right md:text-left"
-        >
-          Remove
-        </button>
-      </div>
-    </div>
+            <div class="mt-4 flex flex-col gap-1">
+              <label class="text-xs font-bold uppercase text-gray-500"
+                >Notes</label
+              >
+              <input
+                v-model="payment.notes"
+                type="text"
+                placeholder="Payment notes"
+                class="text-primary w-full border-gray-300 rounded-md focus:ring-blue-500"
+              />
+            </div>
+            <div class="flex flex-col gap-1">
+              <button
+                @click="removePayment(idx)"
+                class="mt-7 text-red-600 hover:text-red-800 text-sm font-medium border border-red-800 rounded-md px-3 py-1 transition-colors self-start"
+              >
+                Remove
+              </button>
+            </div>
+          </div>
 
-    <div class="mt-4 flex flex-col gap-1">
-      <label class="text-xs font-bold uppercase text-gray-500">Notes</label>
-      <input
-        v-model="payment.notes"
-        type="text"
-        placeholder="Payment notes"
-        class="text-primary w-full border-gray-300 rounded-md focus:ring-blue-500"
-      />
-    </div>
-  </div>
-
-  <button
-    @click="addPayment"
-    class="w-full md:w-auto btn-outline mt-2 border-2 border-dashed border-gray-300 py-3 hover:border-blue-500 hover:bg-blue-50 transition-all rounded-lg text-gray-600 font-medium"
-  >
-    + Add payment
-  </button>
-</div>
+          <button
+            @click="addPayment"
+            class="w-full md:w-auto btn-outline mt-2 border-2 border-dashed border-gray-300 py-3 hover:border-blue-500 hover:bg-blue-50 transition-all rounded-lg text-gray-600 font-medium"
+          >
+            + Add payment
+          </button>
+        </div>
 
         <div class="text-right font-bold">
           Total: {{ orderTotal.toFixed(2) }}
@@ -218,27 +221,26 @@
     </div>
 
     <!-- existing orders list -->
-    <div class="grid grid-cols-1 gap-4">
-      <div
+    <div class="grid grid-cols-1 gap-4 p-4">
+      <OrdersList
         v-for="o in paginatedOrders"
         :key="o.id"
-        class="bg-white shadow rounded-lg p-4"
-      >
-        <div class="flex justify-between">
-          <div>
-            <h4 class="font-semibold">
-              Order #{{ o.id }} - {{ getCustomerName(o.customer_id) }}
-            </h4>
-            <p class="text-sm text-gray-600">Status: {{ o.status }}</p>
-          </div>
-          <div class="font-bold">{{ o.total?.toFixed(2) || 0 }}</div>
-        </div>
-      </div>
+        :order="o"
+        :customers="customers"
+        @click="openDetails(o)"
+      />
+
+      <OrderDetailsDialog
+        v-if="isDialogOpen"
+        :order="selectedOrder"
+        :customers="customers"
+        @close="isDialogOpen = false"
+      />
     </div>
 
     <div
       v-if="totalPages > 1"
-      class="mt-8 flex items-center justify-center gap-2"
+      class="mt-8 flex items-center justify-center gap-2 mb-5"
     >
       <button
         @click="previousPage"
@@ -263,11 +265,16 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, onMounted } from "vue";
+import OrdersList from "../components/Order/OrdersList.vue";
+import OrderDetailsDialog from "../components/Order/OrderDetailsDialog.vue";
 import api from "../api/api";
 import type { Customer } from "../types/customer";
 import type { Product } from "../types/product";
 import type { Order, OrderedItem } from "../types/order";
 import Dropdown from "../components/Dropdown.vue";
+
+const selectedOrder = ref(null);
+const isDialogOpen = ref(false);
 
 const orders = ref<Order[]>([]);
 const customers = ref<Customer[]>([]);
@@ -275,6 +282,11 @@ const products = ref<Product[]>([]);
 const showForm = ref(false);
 const currentPage = ref(1);
 const itemsPerPage = 5;
+
+const openDetails = (order) => {
+  selectedOrder.value = order;
+  isDialogOpen.value = true;
+};
 
 const form = reactive<any>({
   customer_id: null,

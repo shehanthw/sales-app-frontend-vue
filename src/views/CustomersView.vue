@@ -3,7 +3,7 @@
     <div class="mb-8 flex items-center justify-between">
       <h1 class="text-3xl font-bold text-gray-900">Customers</h1>
       <button
-        @click="showForm = !showForm"
+        @click="cancelForm()"
         class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition"
       >
         {{ showForm ? "Cancel" : "+ New Customer" }}
@@ -106,9 +106,9 @@
           <button
             v-if="c.latitude && c.longitude"
             @click="openGoogleMaps(c)"
-            class="flex-1 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded transition"
+            class="flex-1 px-3 py-2  hover:bg-green-700 text-green-700 hover:text-white border border-green-700 text-sm font-medium rounded transition"
           >
-            📍 Map
+            Map
           </button>
         </div>
       </div>
@@ -251,7 +251,6 @@ const resetForm = () => {
     longitude: "",
   };
   editingId.value = null;
-  showForm.value = false;
   locationMessage.value = "";
   locationError.value = false;
 };
@@ -273,6 +272,11 @@ const nextPage = () => {
   if (currentPage.value < totalPages.value) {
     currentPage.value++;
   }
+};
+
+const cancelForm = () => {
+  resetForm();
+  showForm.value = !showForm.value;
 };
 
 onMounted(fetchCustomers);
