@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-center items-center min-h-screen px-4">
+  <div class="flex justify-center items-center px-4 h-[calc(100vh-30vh)]">
     <div class="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
       <h2 class="text-2xl font-bold mb-6 text-gray-800">Login</h2>
       <form @submit.prevent="handleLogin" class="space-y-4">
@@ -18,7 +18,7 @@
       <p v-if="errorMessage" class="mt-4 text-red-600 text-sm">{{ errorMessage }}</p>
       <div class="mt-6 text-center text-sm text-gray-600">
         Don't have an account? 
-        <router-link to="/register" class="text-blue-600 hover:text-blue-700 font-medium">Register here</router-link>
+        <router-link to="/register" class="text-blue-600 hover:text-blue-700 font-medium">Contact us</router-link>
       </div>
     </div>
   </div>
