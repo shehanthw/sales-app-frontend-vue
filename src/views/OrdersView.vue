@@ -114,7 +114,7 @@
 
             <div class="grid gap-1">
               <button
-                @click="removeItem(idx)"
+                @click="removeItem(Number(idx))"
                 class="mt-7 text-red-600 hover:text-red-800 text-sm font-medium border border-red-800 rounded-md px-3 py-1 transition-colors self-start"
               >
                 Remove
@@ -191,7 +191,7 @@
             </div>
             <div class="flex flex-col gap-1">
               <button
-                @click="removePayment(idx)"
+                @click="removePayment(Number(idx))"
                 class="mt-7 text-red-600 hover:text-red-800 text-sm font-medium border border-red-800 rounded-md px-3 py-1 transition-colors self-start"
               >
                 Remove
@@ -270,7 +270,7 @@ import OrderDetailsDialog from "../components/Order/OrderDetailsDialog.vue";
 import api from "../api/api";
 import type { Customer } from "../types/customer";
 import type { Product } from "../types/product";
-import type { Order, OrderedItem } from "../types/order";
+import type { Order } from "../types/order";
 import Dropdown from "../components/Dropdown.vue";
 
 const selectedOrder = ref(null);
@@ -283,7 +283,7 @@ const showForm = ref(false);
 const currentPage = ref(1);
 const itemsPerPage = 5;
 
-const openDetails = (order) => {
+const openDetails = (order: any) => {
   selectedOrder.value = order;
   isDialogOpen.value = true;
 };
@@ -424,11 +424,6 @@ const resetForm = () => {
   form.items = [];
   form.payments = [];
   showForm.value = false;
-};
-
-const getCustomerName = (id: any) => {
-  const c = customers.value.find((x) => x.id === id);
-  return c ? c.name : "Unknown";
 };
 
 const previousPage = () => {
