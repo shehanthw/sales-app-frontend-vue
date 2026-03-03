@@ -198,6 +198,7 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import api from "./api/api";
 import "./style.css";
+import { logout } from "./api/auth";
 
 const router = useRouter();
 const mobileOpen = ref(false);
@@ -216,10 +217,9 @@ const toggleMobile = () => {
 
 const handleLogout = async () => {
   try {
-    await api.post("/api/logout");
+    logout();
     userMenuOpen.value = false;
     mobileOpen.value = false;
-    router.push("/login");
   } catch (err) {
     console.error("Logout failed", err);
   }

@@ -10,142 +10,45 @@
       </button>
     </div>
 
-    <div v-if="showForm" class="bg-white shadow rounded-lg p-6 mb-8">
-      <h3 class="text-xl font-semibold text-gray-800 mb-4">
-        {{ editingId ? "Edit" : "Create" }} Customer
-      </h3>
-      <div class="space-y-4">
-        <input
-          v-model="form.name"
-          placeholder="Full Name"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-        />
-        <input
-          v-model="form.email"
-          type="email"
-          placeholder="Email Address"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-        />
-        <input
-          v-model="form.phone"
-          type="tel"
-          placeholder="Phone Number"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-        />
-        <input
-          v-model="form.address"
-          type="textarea"
-          placeholder="Address"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-        />
-
-        <div class="border-t pt-4 mt-4">
-          <button
-            @click="getLocation"
-            :disabled="gettingLocation"
-            class="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-300 text-white font-semibold rounded-lg transition"
-          >
-            {{
-              gettingLocation
-                ? "Getting Location..."
-                : "📍 Get Current Location"
-            }}
-          </button>
-          <div
-            v-if="locationMessage"
-            class="mt-2 text-sm"
-            :class="locationError ? 'text-red-600' : 'text-green-600'"
-          >
-            {{ locationMessage }}
-          </div>
-          <div
-            v-if="form.latitude && form.longitude"
-            class="mt-2 text-sm text-gray-600"
-          >
-            <p>Latitude: {{ form.latitude }}</p>
-            <p>Longitude: {{ form.longitude }}</p>
-          </div>
-        </div>
-
-        <button
-          @click="saveCustomer"
-          class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition"
-        >
-          Save
-        </button>
-      </div>
+    <!-- Create customer form -->
+    <div v-if="showForm">
+      <CreateCustomer
+        :form="form"
+        :customers="customers"
+        :getLocation="getLocation"
+        :gettingLocation="gettingLocation"
+        :locationMessage="locationMessage"
+        :locationError="locationError"
+        :saveCustomer="saveCustomer"
+        @close="showForm = false"
+        :editingId="form.id"
+      />
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div
-        v-for="c in paginatedCustomers"
-        :key="c.id"
-        class="bg-white shadow rounded-lg p-6 flex flex-col justify-between"
-      >
-        <div class="mb-4">
-          <h3 class="text-lg font-semibold text-gray-900">{{ c.name }}</h3>
-          <p class="text-gray-600 text-sm">{{ c.email }}</p>
-          <p class="text-gray-600 text-sm">{{ c.phone }}</p>
-          <p v-if="c.address" class="text-gray-600 text-sm mt-2">
-            {{ c.address }}
-          </p>
-        </div>
-        <div class="flex gap-2 flex-wrap">
-          <button
-            @click="editCustomer(c)"
-            class="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded transition"
-          >
-            Edit
-          </button>
-          <button
-            @click="deleteCustomer(c.id!)"
-            class="flex-1 px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded transition"
-          >
-            Delete
-          </button>
-          <button
-            v-if="c.latitude && c.longitude"
-            @click="openGoogleMaps(c)"
-            class="flex-1 px-3 py-2  hover:bg-green-700 text-green-700 hover:text-white border border-green-700 text-sm font-medium rounded transition"
-          >
-            Map
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="totalPages > 1" class="mt-8 flex lg:justify-end justify-center items-center mb-4 w-full">
-      <div class="flex items-center gap-2">
-        <button
-          @click="previousPage"
-          :disabled="currentPage === 1"
-          class="px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-300 text-white font-medium rounded-lg transition"
-        >
-          ← Previous
-        </button>
-        <span class="text-gray-700 font-medium"
-          >Page {{ currentPage }} of {{ totalPages }}</span
-        >
-        <button
-          @click="nextPage"
-          :disabled="currentPage === totalPages"
-          class="px-4 py-2 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-300 text-white font-medium rounded-lg transition"
-        >
-          Next →
-        </button>
-      </div>
-    </div>
+    <!-- Customer List -->
+    <ListCustomers
+      :paginatedCustomers="paginatedCustomers"
+      :totalPages="totalPages"
+      :currentPage="currentPage"
+      :editCustomer="editCustomer"
+      :deleteCustomer="deleteCustomer"
+      :openGoogleMaps="openGoogleMaps"
+      :previousPage="previousPage"
+      :nextPage="nextPage"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
-import api from "../api/api";
 import type { Customer } from "../types/customer";
+import { getAllCustomers, postCustomer, putCustomer, removeCustomer } from "../api/customers";
+import CreateCustomer from "../components/customers/CreateCustomer.vue";
+import ListCustomers from "../components/customers/ListCustomers.vue";
 
 const customers = ref<Customer[]>([]);
 const showForm = ref(false);
-const editingId = ref<number | null>(null);
+const editingId = ref<number | null>(null); 
 const gettingLocation = ref(false);
 const locationMessage = ref<string>("");
 const locationError = ref(false);
@@ -156,6 +59,7 @@ const form = ref<Customer>({
   name: "",
   email: "",
   phone: "",
+  nic: "",
   address: "",
   latitude: "",
   longitude: "",
@@ -173,7 +77,7 @@ const paginatedCustomers = computed(() => {
 
 const fetchCustomers = async () => {
   try {
-    const { data } = await api.get("/api/customers");
+    const { data } = await getAllCustomers();
     customers.value = data;
     currentPage.value = 1;
   } catch (err) {
@@ -184,12 +88,13 @@ const fetchCustomers = async () => {
 const saveCustomer = async () => {
   try {
     if (editingId.value) {
-      await api.put(`/api/customers/${editingId.value}`, form.value);
+      await putCustomer(editingId.value, form.value);
     } else {
-      await api.post("/api/customers", form.value);
+      await postCustomer(form.value);
     }
     resetForm();
     fetchCustomers();
+    showForm.value = false;
   } catch (err) {
     alert("Error saving customer");
   }
@@ -202,9 +107,16 @@ const editCustomer = (customer: Customer) => {
 };
 
 const deleteCustomer = async (id: number) => {
+  if (!id) return; // Safety check
+
   if (confirm("Delete this customer?")) {
-    await api.delete(`/api/customers/${id}`);
-    fetchCustomers();
+    try {
+      await removeCustomer(id); 
+      await fetchCustomers(); 
+    } catch (err) {
+      console.error("Failed to delete customer:", err);
+      alert("Could not delete customer. Please try again.");
+    }
   }
 };
 
@@ -246,6 +158,7 @@ const resetForm = () => {
     name: "",
     email: "",
     phone: "",
+    nic: "",
     address: "",
     latitude: "",
     longitude: "",

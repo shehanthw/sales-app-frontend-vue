@@ -3,7 +3,6 @@ import {
   createWebHistory,
   type RouteRecordRaw,
 } from "vue-router";
-import api, { type AuthCheckResponse } from "../api/api";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -46,24 +45,6 @@ const routes: Array<RouteRecordRaw> = [
 const router = createRouter({
   history: createWebHistory(),
   routes,
-});
-
-// Guard logic
-router.beforeEach(async (to, _from, next) => {
-  if (to.meta.requiresAuth) {
-    try {
-      const { data } = await api.get<AuthCheckResponse>("/api/check");
-      if (data.logged_in) {
-        next();
-      } else {
-        next({ name: "Login" });
-      }
-    } catch (error) {
-      next({ name: "Login" });
-    }
-  } else {
-    next();
-  }
 });
 
 export default router;
