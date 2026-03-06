@@ -60,30 +60,19 @@
       </div>
     </div>
 
-    <div v-if="totalPages > 1" class="mt-10 flex justify-center lg:justify-end items-center gap-4">
-      <button 
-        @click="previousPage" 
-        :disabled="currentPage === 1"
-        class="p-2 rounded-full border border-gray-300 disabled:opacity-30 hover:bg-gray-100 transition"
-      >
-        ←
-      </button>
-      <div class="px-4 py-1 bg-gray-100 rounded-full text-xs font-bold text-gray-600 uppercase tracking-tighter">
-        Page {{ currentPage }} / {{ totalPages }}
-      </div>
-      <button 
-        @click="nextPage" 
-        :disabled="currentPage === totalPages"
-        class="p-2 rounded-full border border-gray-300 disabled:opacity-30 hover:bg-gray-100 transition"
-      >
-        →
-      </button>
-    </div>
+    <Pagination 
+      v-if="totalPages > 0"
+      :totalPages="totalPages"
+      :currentPage="currentPage"
+      :previousPage="previousPage"
+      :nextPage="nextPage"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import type { Customer } from '../../types/customer';
+import Pagination from '../Pagination.vue';
 
 const props = defineProps<{
     paginatedCustomers: Customer[];

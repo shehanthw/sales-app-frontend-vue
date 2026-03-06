@@ -1,7 +1,6 @@
 <template>
   <div
     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
-    @click.self="handleClose"
   >
     <div
       class="bg-white shadow-xl rounded-lg p-6 w-full max-w-lg overflow-y-auto max-h-[90vh]"

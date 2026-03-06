@@ -1,17 +1,33 @@
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6">
-    <div class="mb-8 flex items-center justify-between">
-      <h1 class="text-3xl font-bold text-gray-900">Customers</h1>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+    <div class="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Customers</h1>
+        <p class="text-gray-500 text-sm">Manage your client directory and locations.</p>
+      </div>
       <button
         @click="cancelForm()"
-        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition"
+        class="w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition-all"
       >
         {{ showForm ? "Cancel" : "+ New Customer" }}
       </button>
     </div>
 
-    <!-- Create customer form -->
-    <div v-if="showForm">
+    <div class="mb-6">
+      <div class="relative max-w-md">
+        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+          🔍
+        </span>
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Search by name, phone, or NIC..."
+          class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition shadow-sm"
+        />
+      </div>
+    </div>
+
+    <div v-if="showForm" key="customer-modal">
       <CreateCustomer
         :form="form"
         :customers="customers"
@@ -25,28 +41,36 @@
       />
     </div>
 
-    <!-- Customer List -->
-    <ListCustomers
-      :paginatedCustomers="paginatedCustomers"
-      :totalPages="totalPages"
-      :currentPage="currentPage"
-      :editCustomer="editCustomer"
-      :deleteCustomer="deleteCustomer"
-      :openGoogleMaps="openGoogleMaps"
-      :previousPage="previousPage"
-      :nextPage="nextPage"
-    />
+    <div v-if="filteredCustomers.length > 0">
+      <ListCustomers
+        :paginatedCustomers="paginatedCustomers"
+        :totalPages="totalPages"
+        :currentPage="currentPage"
+        :editCustomer="editCustomer"
+        :deleteCustomer="deleteCustomer"
+        :openGoogleMaps="openGoogleMaps"
+        :previousPage="previousPage"
+        :nextPage="nextPage"
+      />
+    </div>
+
+    <div v-else class="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+      <p class="text-gray-500 text-lg">No customers found matching "{{ searchQuery }}"</p>
+      <button @click="searchQuery = ''" class="mt-2 text-blue-600 font-semibold hover:underline">Clear search</button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import type { Customer } from "../types/customer";
 import { getAllCustomers, postCustomer, putCustomer, removeCustomer } from "../api/customers";
 import CreateCustomer from "../components/customers/CreateCustomer.vue";
 import ListCustomers from "../components/customers/ListCustomers.vue";
 
+// --- STATE ---
 const customers = ref<Customer[]>([]);
+const searchQuery = ref("");
 const showForm = ref(false);
 const editingId = ref<number | null>(null); 
 const gettingLocation = ref(false);
@@ -65,21 +89,43 @@ const form = ref<Customer>({
   longitude: "",
 });
 
-const totalPages = computed(() => {
-  return Math.ceil(customers.value.length / itemsPerPage);
+// --- COMPUTED (The Funnel) ---
+
+// 1. Filter original list by search query
+const filteredCustomers = computed(() => {
+  const query = searchQuery.value.toLowerCase().trim();
+  if (!query) return customers.value;
+
+  return customers.value.filter((c) => {
+    return (
+      c.name.toLowerCase().includes(query) ||
+      c.phone.includes(query) ||
+      (c.nic && c.nic.toLowerCase().includes(query))
+    );
+  });
 });
 
+// 2. Calculate pages based on filtered results
+const totalPages = computed(() => {
+  return Math.max(1, Math.ceil(filteredCustomers.value.length / itemsPerPage));
+});
+
+// 3. Slice filtered results for pagination
 const paginatedCustomers = computed(() => {
   const start = (currentPage.value - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return customers.value.slice(start, end);
+  return filteredCustomers.value.slice(start, start + itemsPerPage);
 });
 
+// --- WATCHERS ---
+watch(searchQuery, () => {
+  currentPage.value = 1; // Reset to page 1 whenever user types
+});
+
+// --- METHODS ---
 const fetchCustomers = async () => {
   try {
     const { data } = await getAllCustomers();
     customers.value = data;
-    currentPage.value = 1;
   } catch (err) {
     console.error("Failed to fetch customers");
   }
@@ -93,7 +139,7 @@ const saveCustomer = async () => {
       await postCustomer(form.value);
     }
     resetForm();
-    fetchCustomers();
+    await fetchCustomers();
     showForm.value = false;
   } catch (err) {
     alert("Error saving customer");
@@ -107,15 +153,13 @@ const editCustomer = (customer: Customer) => {
 };
 
 const deleteCustomer = async (id: number) => {
-  if (!id) return; // Safety check
-
-  if (confirm("Delete this customer?")) {
+  if (!id) return;
+  if (confirm("Are you sure you want to delete this customer?")) {
     try {
       await removeCustomer(id); 
       await fetchCustomers(); 
     } catch (err) {
-      console.error("Failed to delete customer:", err);
-      alert("Could not delete customer. Please try again.");
+      console.error("Delete failed:", err);
     }
   }
 };
@@ -123,46 +167,27 @@ const deleteCustomer = async (id: number) => {
 const getLocation = () => {
   if (!navigator.geolocation) {
     locationError.value = true;
-    locationMessage.value = "Geolocation is not supported by your browser";
+    locationMessage.value = "Geolocation not supported";
     return;
   }
-
   gettingLocation.value = true;
-  locationError.value = false;
-  locationMessage.value = "";
-
   navigator.geolocation.getCurrentPosition(
     (position) => {
       form.value.latitude = position.coords.latitude.toString();
       form.value.longitude = position.coords.longitude.toString();
-      locationError.value = false;
-      locationMessage.value = "Location captured successfully!";
+      locationMessage.value = "Location captured!";
       gettingLocation.value = false;
     },
-    (error) => {
+    () => {
       locationError.value = true;
       gettingLocation.value = false;
-      if (error.code === error.PERMISSION_DENIED) {
-        locationMessage.value = "Location permission denied";
-      } else if (error.code === error.POSITION_UNAVAILABLE) {
-        locationMessage.value = "Location information is unavailable";
-      } else {
-        locationMessage.value = "An error occurred while getting location";
-      }
-    },
+      locationMessage.value = "Could not get location";
+    }
   );
 };
 
 const resetForm = () => {
-  form.value = {
-    name: "",
-    email: "",
-    phone: "",
-    nic: "",
-    address: "",
-    latitude: "",
-    longitude: "",
-  };
+  form.value = { name: "", email: "", phone: "", nic: "", address: "", latitude: "", longitude: "" };
   editingId.value = null;
   locationMessage.value = "";
   locationError.value = false;
@@ -170,27 +195,14 @@ const resetForm = () => {
 
 const openGoogleMaps = (customer: Customer) => {
   if (customer.latitude && customer.longitude) {
-    const mapsUrl = `https://maps.google.com/?q=${customer.latitude},${customer.longitude}`;
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${customer.latitude},${customer.longitude}`;
     window.open(mapsUrl, "_blank");
   }
 };
 
-const previousPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-  }
-};
-
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-  }
-};
-
-const cancelForm = () => {
-  resetForm();
-  showForm.value = !showForm.value;
-};
+const previousPage = () => { if (currentPage.value > 1) currentPage.value--; };
+const nextPage = () => { if (currentPage.value < totalPages.value) currentPage.value++; };
+const cancelForm = () => { resetForm(); showForm.value = !showForm.value; };
 
 onMounted(fetchCustomers);
 </script>

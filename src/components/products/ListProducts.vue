@@ -73,28 +73,18 @@
       </div>
     </div>
     
-    <div v-if="totalPages > 1" class="mt-10 flex justify-center lg:justify-end items-center gap-4">
-      <button 
-        @click="previousPage" 
-        :disabled="currentPage === 1"
-        class="p-2 rounded-full border border-gray-300 disabled:opacity-30 hover:bg-gray-100 transition"
-      >
-        <span class="sr-only">Previous</span>
-        ←
-      </button>
-      <span class="text-sm font-semibold text-gray-600">Page {{ currentPage }} of {{ totalPages }}</span>
-      <button 
-        @click="nextPage" 
-        :disabled="currentPage === totalPages"
-        class="p-2 rounded-full border border-gray-300 disabled:opacity-30 hover:bg-gray-100 transition"
-      >
-        Next →
-      </button>
-    </div>
+    <Pagination 
+      v-if="totalPages > 0"
+      :totalPages="totalPages"
+      :currentPage="currentPage"
+      :previousPage="previousPage"
+      :nextPage="nextPage"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+import Pagination from "../Pagination.vue";
 import type { Product } from "../../types/product";
 
 const props = defineProps<{

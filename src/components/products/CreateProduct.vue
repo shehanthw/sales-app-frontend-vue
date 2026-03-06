@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4" @click.self="handleClose">
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
     <div class="bg-white shadow-xl rounded-lg p-6 w-full max-w-2xl overflow-y-auto max-h-[90vh]">
       
       <div class="flex justify-between items-center mb-4">
