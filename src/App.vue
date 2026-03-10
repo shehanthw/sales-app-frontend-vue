@@ -162,12 +162,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from "vue";
-import { useRouter } from "vue-router";
 import HeaderLarge from "./components/HeaderLarge.vue";
 import "./style.css";
 import { logout } from "./api/auth";
 
-const router = useRouter();
 const mobileOpen = ref(false);
 const userMenuOpen = ref(false);
 
@@ -176,6 +174,7 @@ const navLinks = [
   { name: "Customers", path: "/customers" },
   { name: "Products", path: "/products" },
   { name: "Orders", path: "/orders" },
+  { name: "Collections", path: "/collections" },
 ];
 
 const toggleMobile = () => {

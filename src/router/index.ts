@@ -40,6 +40,12 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("../views/OrdersView.vue"),
     meta: { requiresAuth: true },
   },
+  {
+    path: "/collections",
+    name: "Collections",
+    component: () => import("../views/CollectionsView.vue"),
+    meta: { requiresAuth: true },
+  },
 ];
 
 const router = createRouter({

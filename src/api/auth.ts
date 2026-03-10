@@ -31,3 +31,23 @@ export const healthCheck = async () => {
     throw err; 
   }
 };
+
+export const getAllUsers = async () => {
+  try {
+    const { data } = await api.get("/api/users");
+    return data;
+  } catch (err) {
+    console.error("Health check failed", err);
+    throw err; 
+  }
+};
+
+export const getUserById = async (user_id: string) => {
+  try {
+    const { data } = await api.get(`/api/user/${user_id}`);
+    return data;
+  } catch (err) {
+    console.error("Health check failed", err);
+    throw err; 
+  }
+};
