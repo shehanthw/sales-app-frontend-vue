@@ -48,6 +48,15 @@
           placeholder="Search by status"
         />
       </div>
+
+      <div class="flex justify-center">
+        <button
+          @click="clearFilters"
+          class="px-3 py-2 bg-blue-100 rounded-md text-blue-600 text-sm hover:bg-blue-400 hover:text-white"
+        >
+          Refresh
+        </button>
+      </div>
     </div>
 
     <!-- Order create form -->
@@ -70,9 +79,10 @@
       @cancel="cancelForm"
       :cancel="cancelForm"
       :fetchData="fetchData"
+      :sellers="users"
     />
 
-    <div class="grid grid-cols-1 gap-4 p-4">
+    <div class="grid grid-cols-1 gap-4 p-4" :key="filteredOrders.length">
       <OrdersList
         v-for="o in paginatedOrders"
         :key="o.id"
@@ -127,6 +137,7 @@ import OrdersList from "../components/Order/OrdersList.vue";
 import OrderDetailsDialog from "../components/Order/OrderDetailsDialog.vue";
 import { getAllCustomers } from "../api/customers";
 import Dropdown from "../components/Dropdown.vue";
+import { useRoute } from "vue-router";
 import {
   getOrderById,
   getProductsByOrderId,
@@ -134,9 +145,12 @@ import {
   getCollectionsByOrderIdOrSellerID,
 } from "../api/orders";
 
+const route = useRoute();
+
 // --- State Management ---
 const orders = ref<any[]>([]);
 const customers = ref<any[]>([]);
+const users = ref<any[]>([]);
 const products = ref<any[]>([]);
 const showOrderModal = ref(false);
 const showEditOrderModal = ref(false);
@@ -147,6 +161,7 @@ const itemsPerPage = 5;
 const searchQuery = ref("");
 const searchedCustomer = ref("");
 const searchedStatus = ref("");
+const searchedOrder = ref<string>("");
 const statusList = ref([
   { id: 1, name: "pending" },
   { id: 2, name: "completed" },
@@ -155,7 +170,9 @@ const statusList = ref([
 
 // Unified reactive form state
 const orderForm = reactive({
+  id: null,
   customer_id: null,
+  seller_id: null,
   number_of_installments: 1,
   down_payment: 0,
   notes: "",
@@ -164,17 +181,23 @@ const orderForm = reactive({
   collections: [] as any[],
 });
 
+onMounted(() => {
+  if (route.query.order) searchedOrder.value = String(route.query.order);
+});
+
 // --- Logic ---
 const fetchData = async () => {
   try {
-    const [cRes, pRes, oRes] = await Promise.all([
+    const [cRes, pRes, oRes, uRes] = await Promise.all([
       getAllCustomers(),
       api.get("/api/products/"),
       api.get("/api/orders/"),
+      api.get("/api/users/"),
     ]);
     customers.value = cRes.data;
     products.value = pRes.data;
     orders.value = oRes.data;
+    users.value = uRes.data;
   } catch (err) {
     console.error("Fetch failed", err);
   }
@@ -187,14 +210,15 @@ const openCreateModal = () => {
 
 const openEditModal = async (id: any) => {
   resetForm();
-
   try {
     const response = await getOrderById(id);
     const orderData = response.data[0];
     const items = await getProductsByOrderId(orderData.id);
     const collections = await getCollectionsByOrderIdOrSellerID(orderData.id);
 
+    orderForm.id = orderData.id;
     orderForm.customer_id = orderData.customer_id;
+    orderForm.seller_id = orderData.seller_id;
     orderForm.number_of_installments = orderData.number_of_installments;
     orderForm.down_payment = orderData.down_payment;
     orderForm.notes = orderData.notes;
@@ -234,42 +258,46 @@ const resetForm = () => {
   });
 };
 
-const cancelForm = () => {
+const cancelForm = async () => {
   showOrderModal.value = false;
   showEditOrderModal.value = false;
   resetForm();
+  await fetchData();
 };
 
 const filteredOrders = computed(() => {
   let result = orders.value;
 
-  // 1. Filter by Search Query (Status or Date)
-  if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase().trim();
-    result = result.filter((o) => {
-      const status = o.status ? o.status.toLowerCase() : "";
-      const date = o.created_at ? o.created_at : "";
-      return status.includes(query) || date.includes(query);
-    });
-  }
+  // Filter by specific order id
+  if (searchedOrder.value) {
+    result = result.filter((o) => String(o.id) === searchedOrder.value);
+  } else {
+    if (searchedCustomer.value) {
+      result = result.filter((o) => {
+        return String(o.customer_id) === String(searchedCustomer.value);
+      });
+    }
 
-  // 2. Filter by Customer (Additive)
-  if (searchedCustomer.value) {
-    result = result.filter((o) => {
-      return String(o.customer_id) === String(searchedCustomer.value);
-    });
-  }
+    // Filter by status (existing logic)
+    if (searchedStatus.value) {
+      const selectedStatus = statusList.value.find(
+        (s) => String(s.id) === String(searchedStatus.value),
+      );
+      result = result.filter(
+        (o) => String(o.status) === String(selectedStatus?.name),
+      );
+    }
 
-  // 3. Filter by Status list (Additive)
-  if (searchedStatus.value) {
-    const selectedStatus = statusList.value.find(
-      (s) => String(s.id) === String(searchedStatus.value),
-    );
-    result = result.filter((o) => {
-      return String(o.status) === String(selectedStatus?.name);
-    });
+    // Add search query filtering if needed
+    if (searchQuery.value.trim()) {
+      const query = searchQuery.value.toLowerCase().trim();
+      result = result.filter((o) => {
+        const status = o.status?.toLowerCase() || "";
+        const date = o.created_at || "";
+        return status.includes(query) || date.includes(query);
+      });
+    }
   }
-
   return result;
 });
 
@@ -294,6 +322,10 @@ watch(searchedStatus, () => {
   currentPage.value = 1;
 });
 
+watch(filteredOrders, () => {
+  currentPage.value = 1;
+});
+
 const previousPage = () => {
   if (currentPage.value > 1) currentPage.value--;
 };
@@ -301,5 +333,14 @@ const nextPage = () => {
   if (currentPage.value < totalPages.value) currentPage.value++;
 };
 
-onMounted(fetchData);
+const clearFilters = async () => {
+  searchedOrder.value = "";
+  searchedStatus.value = "";
+  searchQuery.value = "";
+  searchedCustomer.value = "";
+};
+
+onMounted(() => {
+  fetchData();
+});
 </script>

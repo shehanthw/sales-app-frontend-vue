@@ -1,6 +1,10 @@
 <script setup>
 import { computed, onMounted, ref, watch } from "vue";
 import { getCollectionsByOrderIdOrSellerID } from "../../api/orders";
+import {
+  calculateBalanceAmount,
+  calculateTotalPaidAmount,
+} from "../../utils/order-calculations";
 
 const props = defineProps({
   order: { type: Object, required: true },
@@ -28,12 +32,15 @@ const calculateTotalPaid = async () => {
     }
   }
 
-  totalPaid.value = downPayment + totalCollectedAmount;
+  totalPaid.value = calculateTotalPaidAmount(downPayment, totalCollectedAmount);
 };
 
 // Remaining Balance
 const calculateRemainingBalance = () => {
-  remainingBalance.value = props.order.total_amount - totalPaid.value;
+  remainingBalance.value = calculateBalanceAmount(
+    props.order.total_amount,
+    totalPaid.value,
+  );
 };
 
 onMounted(async () => {
@@ -176,7 +183,7 @@ const statusClasses = (status) => {
               >Paid</span
             >
             <span class="text-xs sm:text-sm font-bold text-emerald-600"
-              >Rs.{{ totalPaid}}</span
+              >Rs.{{ totalPaid }}</span
             >
           </div>
           <div class="flex flex-col pl-1">
@@ -184,9 +191,20 @@ const statusClasses = (status) => {
               class="text-[9px] font-bold text-rose-500 uppercase tracking-tighter"
               >Balance</span
             >
-            <span class="text-xs sm:text-sm font-bold text-rose-600"
-              >Rs.{{ remainingBalance }}</span
+            <span
+              :class="{
+                'text-xs sm:text-sm font-bold text-rose-600':
+                  order.status !== 'completed',
+                  'text-xl sm:text-xl font-bold text-green-600':
+                  order.status === 'completed',
+              }"
             >
+              {{
+                order.status === "completed"
+                  ? "Paid"
+                  : `Rs. ${remainingBalance}`
+              }}
+            </span>
           </div>
         </div>
       </div>

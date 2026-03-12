@@ -11,17 +11,17 @@
         <label class="block text-sm font-medium text-gray-700"
           >Date Range</label
         >
-        <div class="flex gap-2 items-center">
+        <div class="grid md:flex gap-2 items-center">
           <input
             v-model="startDate"
             type="date"
-            class="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition shadow-sm"
+            class="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none transition shadow-sm"
           />
-          <span class="text-gray-500">to</span>
+          <span class="text-gray-500 text-center">to</span>
           <input
             v-model="endDate"
             type="date"
-            class="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition shadow-sm"
+            class="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none transition shadow-sm"
           />
         </div>
       </div>
@@ -48,13 +48,12 @@
         >
         <select
           v-model="selectedStatus"
-          class="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition shadow-sm"
+          class="w-full px-4 py-2.5 border bg-white border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition shadow-sm"
         >
           <option value="">All Statuses</option>
           <option value="paid">Completed</option>
           <option value="pending">Pending</option>
           <option value="overdue">Overdue</option>
-          <option value="due_today">Due Today</option>
         </select>
       </div>
     </div>
@@ -67,6 +66,7 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <InstallmentCard
         :installments="paginatedInstallments"
+        :handleFilters="handleFilters"
       />
     </div>
 

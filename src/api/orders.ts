@@ -18,6 +18,15 @@ export const getOrderById = async (id: string) => {
   }
 };
 
+export const getAllOrders = async () => {
+  try {
+    return await api.get(`/api/orders`);
+  } catch (err) {
+    console.error("Failed to fetch order");
+    throw err;
+  }
+};
+
 export const getProductsByOrderId = async (id: string) => {
   try {
     return await api.get(`/api/orders/items/${id}`);
@@ -90,3 +99,13 @@ export const getAllInstallments = async () => {
     throw err;
   }
 };
+
+export const updateSeller = async (orderId: string, sellerId: string) => {
+  const processedString = `?order_id=${orderId}&seller_id=${sellerId}`
+  try {
+    return await api.patch(`/api/orders/seller${processedString}`);
+  } catch (err) {
+    console.error("Failed to update seller in order");
+    throw err;
+  }
+}
