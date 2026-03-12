@@ -3,7 +3,7 @@ import api from "./api";
 
 export const logout = async () => {
   try {
-    await api.post("auth/jwt/logout");
+    await api.post("api/auth/jwt/logout");
     router.push("/login");
   } catch (err) {
     console.error("Logout failed", err);
@@ -12,7 +12,7 @@ export const logout = async () => {
 
 export const login = async (formData: FormData) => {
   try {
-    await api.post("/auth/jwt/login", formData, {
+    await api.post("api/auth/jwt/login", formData, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
@@ -34,7 +34,7 @@ export const healthCheck = async () => {
 
 export const getCurrentUser = async () => {
   try {
-    const data = await api.get("/users/me");
+    const data = await api.get("api/users/me");
     return data;
   } catch (err) {
     console.error("Health check failed", err);
