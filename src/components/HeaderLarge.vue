@@ -7,7 +7,14 @@
       <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">
         Signed in as
       </p>
-      <p class="text-sm font-bold text-gray-900 truncate">admin@salespro.com</p>
+      <p class="text-sm font-bold text-gray-900 truncate">{{ currentUserName }}</p>
+    </div>
+
+     <div class="px-4 border-b border-gray-50 mb-1">
+      <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest">
+        Role
+      </p>
+      <p class="text-sm font-bold text-gray-900 truncate">{{ currentUserRole }}</p>
     </div>
 
     <div class="px-3">
@@ -36,6 +43,22 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, ref } from 'vue';
+import { getCurrentUser } from '../api/auth';
+
+
+    const currentUserName = ref("");
+    const currentUserRole = ref("");
+
+    const handleCurrentUser = async () => {
+        const { data } = await getCurrentUser();
+        currentUserName.value = data.name.trim()
+        currentUserRole.value = data.role.trim();
+    }
+
+    onMounted(() => {
+      handleCurrentUser();
+    })
 
     const props = defineProps<{
         userMenuOpen: boolean;

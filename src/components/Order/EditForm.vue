@@ -9,9 +9,7 @@
       <div
         class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-10"
       >
-        <h3 class="text-xl font-bold text-gray-900">
-          Collect installments
-        </h3>
+        <h3 class="text-xl font-bold text-gray-900">Collect installments</h3>
         <button
           @click="$emit('cancel')"
           class="text-gray-400 hover:text-gray-600"
@@ -36,6 +34,27 @@
       <div class="p-6 overflow-y-auto space-y-6">
         <div>
           <label class="block text-xs font-bold text-gray-500 uppercase mb-1"
+            >Collector</label
+          >
+          <Dropdown
+            v-model="form.seller_id"
+            :options="sellers"
+            optionLabel="name"
+            optionValue="id"
+            class="w-full"
+          />
+          <div class="flex justify-end">
+            <button
+              @click="handleUpdateCollector"
+              class="bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white px-4 py-2 rounded-lg text-xs font-bold transition-colors mt-2"
+            >
+              Update
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-gray-500 uppercase mb-1"
             >Customer</label
           >
           <Dropdown
@@ -43,7 +62,7 @@
             :options="customers"
             optionLabel="name"
             optionValue="id"
-            :disabled=true
+            :disabled="true"
             class="w-full"
           />
         </div>
@@ -54,7 +73,7 @@
             <h4 class="font-bold text-gray-800 text-sm">Order Items</h4>
             <button
               @click="addItem"
-              :disabled=true
+              :disabled="true"
               class="text-gray-400 cursor-not-allowed"
             >
               + Add Item
@@ -289,18 +308,21 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import Dropdown from "../Dropdown.vue";
-import { collectInstallmentById } from "../../api/orders";
+import { collectInstallmentById, updateSeller } from "../../api/orders";
+import { calculateBalanceAmount } from "../../utils/order-calculations";
 
 const props = defineProps<{
   show: boolean;
   customers: any[];
   products: any[];
+  sellers: any[];
   form: any;
   cancel: () => void;
   fetchData: () => void;
 }>();
 
 const finalBalance = ref(0);
+const showUpdateCollectorBtn = ref(false);
 
 const emit = defineEmits(["save", "cancel"]);
 
@@ -325,7 +347,7 @@ const orderTotal = computed(() => {
 const installmentAmount = computed(() => {
   const count = Number(props.form.number_of_installments) || 1;
   const balance = orderTotal.value - (Number(props.form.down_payment) || 0);
-  return balance > 0 ? Math.round(balance / count) : 0;
+  return balance > 0 ? Math.round((balance / count) * 100) / 100 : 0;
 });
 
 // Calculate balance whenever relevant data changes
@@ -338,8 +360,10 @@ const calculateBalance = () => {
     );
 
   if (props.form.customer_id) {
-    finalBalance.value =
-      orderTotal.value - (paidAmount + (Number(props.form.down_payment) || 0));
+    finalBalance.value = calculateBalanceAmount(
+      orderTotal.value,
+      paidAmount + (Number(props.form.down_payment) || 0),
+    );
   } else {
     finalBalance.value = 0;
   }
@@ -363,30 +387,36 @@ watch(
   { immediate: true },
 );
 
-const handleSave = () => {
-  emit("save", {
-    ...props.form,
-    total_amount: orderTotal.value,
-    installment_amount: installmentAmount.value,
-  });
+const handleUpdateCollector = async () => {
+  try {
+    if (confirm("Are you sure to update collector ?")) {
+      await updateSeller(props.form.id, props.form.seller_id);
+      alert("Collector updated successfully!");
+    }
+  } catch (error: any) {
+    const message = error.response?.data?.detail;
+    console.log(message);
+    alert(message);
+  }
 };
 
 const handleCollectPayment = async (id: string) => {
   try {
-    await collectInstallmentById(id);
+    if (confirm("Are you sure to collect this installment ?")) {
+      await collectInstallmentById(id);
 
-    // Update the collection status in the local form data
-    const collection = props.form.collections?.find((c: any) => c.id === id);
-    if (collection) {
-      collection.status = "paid";
-      collection.paid_at = new Date().toISOString();
+      // Update the collection status in the local form data
+      const collection = props.form.collections?.find((c: any) => c.id === id);
+      if (collection) {
+        collection.status = "paid";
+        collection.paid_at = new Date().toISOString();
+      }
+
+      // Recalculate balance after collection
+      calculateBalance();
+      alert("Payment collected successfully.");
+      props.fetchData();
     }
-
-    // Recalculate balance after collection
-    calculateBalance();
-    alert("Payment collected successfully.");
-    props.cancel();
-    props.fetchData();
   } catch (err) {
     console.error("Failed to collect payment", err);
   }

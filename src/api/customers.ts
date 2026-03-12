@@ -18,6 +18,15 @@ export const postCustomer = async (value: any) => {
   }
 };
 
+export const getCustomerById = async (id: string) => {
+  try {
+    return await api.get(`/api/customers/${id}`);
+  } catch (err) {
+    console.error("Failed to save customers");
+    throw err;
+  }
+};
+
 export const putCustomer = async (id: number, value: any) => {
   try {
     await api.put(`/api/customers/${id}`, value);

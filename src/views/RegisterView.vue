@@ -6,6 +6,26 @@
 
       <form @submit.prevent="handleRegister" class="space-y-4">
         <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Full name</label>
+          <input v-model="name" type="text" placeholder="Enter full name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">NIC</label>
+          <input v-model="nic" type="text" placeholder="Enter NIC" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+          <select name="role" id="" v-model="role" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition bg-white">
+            <option value="admin">Admin</option>
+            <option value="collector">Collector</option>
+            <option value="seller">Seller</option>
+            <option value="delivery">Delivery</option>
+          </select>
+        </div>
+
+        <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
           <input v-model="email" type="email" placeholder="name@example.com" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition" />
         </div>
@@ -42,6 +62,9 @@ import api from '../api/api';
 
 const router = useRouter();
 const email = ref('');
+const name = ref('');
+const role = ref('');
+const nic = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const error = ref<string | null>(null);
@@ -58,16 +81,21 @@ const handleRegister = async () => {
 
   loading.value = true;
   try {
-    // We hit the register endpoint (which we'll add to FastAPI next)
-    await api.post('/api/register', {
+    await api.post('/auth/register', {
+      name: name.value,
+      role: role.value,
+      nic: nic.value,
+      is_active: true,
+      is_superuser: false,
+      is_verified: false,
       email: email.value,
       password: password.value
     });
-    
-    // Redirect to login after successful registration
-    router.push({ name: 'Login', query: { registered: 'true' } });
+
+    alert("User registered successfully!")
   } catch (err: any) {
     error.value = err.response?.data?.detail || "Registration failed. Try a different email.";
+    alert("Error in user registration!")
   } finally {
     loading.value = false;
   }

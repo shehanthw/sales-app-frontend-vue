@@ -136,8 +136,10 @@ const saveProduct = async () => {
 
     if (editingId.value) {
       await api.put(`/api/products/${editingId.value}`, payload);
+      alert("Product updated successfully!")
     } else {
       await api.post('/api/products', payload);
+      alert("New product added successfully!")
     }
 
     await fetchProducts(); // Refresh list
@@ -159,8 +161,10 @@ const deleteProduct = async (id: number) => {
     try {
       await api.delete(`/api/products/${id}`);
       await fetchProducts();
-    } catch (err) {
-      alert('Error deleting product.');
+      alert("Product deleted successfully!");
+    } catch (err: any) {
+      const message = err.response?.data?.detail || "Something went wrong";
+      alert(message);
     }
   }
 };

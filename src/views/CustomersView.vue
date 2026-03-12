@@ -1,9 +1,13 @@
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-    <div class="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div
+      class="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+    >
       <div>
         <h1 class="text-3xl font-bold text-gray-900">Customers</h1>
-        <p class="text-gray-500 text-sm">Manage your client directory and locations.</p>
+        <p class="text-gray-500 text-sm">
+          Manage your client directory and locations.
+        </p>
       </div>
       <button
         @click="cancelForm()"
@@ -15,7 +19,9 @@
 
     <div class="mb-6">
       <div class="relative max-w-md">
-        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+        <span
+          class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400"
+        >
           🔍
         </span>
         <input
@@ -54,9 +60,19 @@
       />
     </div>
 
-    <div v-else class="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-      <p class="text-gray-500 text-lg">No customers found matching "{{ searchQuery }}"</p>
-      <button @click="searchQuery = ''" class="mt-2 text-blue-600 font-semibold hover:underline">Clear search</button>
+    <div
+      v-else
+      class="text-center py-20 bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200"
+    >
+      <p class="text-gray-500 text-lg">
+        No customers found matching "{{ searchQuery }}"
+      </p>
+      <button
+        @click="searchQuery = ''"
+        class="mt-2 text-blue-600 font-semibold hover:underline"
+      >
+        Clear search
+      </button>
     </div>
   </div>
 </template>
@@ -64,7 +80,12 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from "vue";
 import type { Customer } from "../types/customer";
-import { getAllCustomers, postCustomer, putCustomer, removeCustomer } from "../api/customers";
+import {
+  getAllCustomers,
+  postCustomer,
+  putCustomer,
+  removeCustomer,
+} from "../api/customers";
 import CreateCustomer from "../components/customers/CreateCustomer.vue";
 import ListCustomers from "../components/customers/ListCustomers.vue";
 
@@ -72,7 +93,7 @@ import ListCustomers from "../components/customers/ListCustomers.vue";
 const customers = ref<Customer[]>([]);
 const searchQuery = ref("");
 const showForm = ref(false);
-const editingId = ref<number | null>(null); 
+const editingId = ref<number | null>(null);
 const gettingLocation = ref(false);
 const locationMessage = ref<string>("");
 const locationError = ref(false);
@@ -135,8 +156,11 @@ const saveCustomer = async () => {
   try {
     if (editingId.value) {
       await putCustomer(editingId.value, form.value);
+      alert("Customer updated successfully!")
+      
     } else {
       await postCustomer(form.value);
+      alert("New customer created successfully!")
     }
     resetForm();
     await fetchCustomers();
@@ -156,10 +180,13 @@ const deleteCustomer = async (id: number) => {
   if (!id) return;
   if (confirm("Are you sure you want to delete this customer?")) {
     try {
-      await removeCustomer(id); 
-      await fetchCustomers(); 
-    } catch (err) {
-      console.error("Delete failed:", err);
+      await removeCustomer(id);
+      await fetchCustomers();
+      alert("Customer deleted successfully!");
+    } catch (err: any) {
+      const message = err.response?.data?.detail || "Something went wrong";
+      console.error(message);
+      alert(message);
     }
   }
 };
@@ -182,12 +209,20 @@ const getLocation = () => {
       locationError.value = true;
       gettingLocation.value = false;
       locationMessage.value = "Could not get location";
-    }
+    },
   );
 };
 
 const resetForm = () => {
-  form.value = { name: "", email: "", phone: "", nic: "", address: "", latitude: "", longitude: "" };
+  form.value = {
+    name: "",
+    email: "",
+    phone: "",
+    nic: "",
+    address: "",
+    latitude: "",
+    longitude: "",
+  };
   editingId.value = null;
   locationMessage.value = "";
   locationError.value = false;
@@ -200,9 +235,16 @@ const openGoogleMaps = (customer: Customer) => {
   }
 };
 
-const previousPage = () => { if (currentPage.value > 1) currentPage.value--; };
-const nextPage = () => { if (currentPage.value < totalPages.value) currentPage.value++; };
-const cancelForm = () => { resetForm(); showForm.value = !showForm.value; };
+const previousPage = () => {
+  if (currentPage.value > 1) currentPage.value--;
+};
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) currentPage.value++;
+};
+const cancelForm = () => {
+  resetForm();
+  showForm.value = !showForm.value;
+};
 
 onMounted(fetchCustomers);
 </script>
