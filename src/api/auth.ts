@@ -24,7 +24,7 @@ export const login = async (formData: FormData) => {
 
 export const healthCheck = async () => {
   try {
-    const { data } = await api.get("/auth/check");
+    const { data } = await api.get("api/auth/check");
     return data.authenticated;
   } catch (err) {
     console.error("Health check failed", err);
@@ -34,7 +34,7 @@ export const healthCheck = async () => {
 
 export const getCurrentUser = async () => {
   try {
-    const data = await api.get("/users/me");
+    const data = await api.get("api/users/me");
     return data;
   } catch (err) {
     console.error("Health check failed", err);
@@ -44,7 +44,7 @@ export const getCurrentUser = async () => {
 
 export const getAllUsers = async () => {
   try {
-    const { data } = await api.get("/users");
+    const { data } = await api.get("api/users");
     return data;
   } catch (err) {
     console.error("Health check failed", err);
@@ -54,7 +54,7 @@ export const getAllUsers = async () => {
 
 export const getUserById = async (user_id: string) => {
   try {
-    const { data } = await api.get(`/user/${user_id}`);
+    const { data } = await api.get(`api/user/${user_id}`);
     return data;
   } catch (err) {
     console.error("Health check failed", err);

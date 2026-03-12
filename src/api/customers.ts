@@ -2,7 +2,7 @@ import api from "./api";
 
 export const getAllCustomers = async () => {
   try {
-    return await api.get("/customers");
+    return await api.get("api/customers");
   } catch (err) {
     console.error("Failed to fetch customers");
     throw err;
@@ -11,7 +11,7 @@ export const getAllCustomers = async () => {
 
 export const postCustomer = async (value: any) => {
   try {
-    await api.post("/customers", value);
+    await api.post("api/customers", value);
   } catch (err) {
     console.error("Failed to save customers");
     throw err;
@@ -20,7 +20,7 @@ export const postCustomer = async (value: any) => {
 
 export const getCustomerById = async (id: string) => {
   try {
-    return await api.get(`/customers/${id}`);
+    return await api.get(`api/customers/${id}`);
   } catch (err) {
     console.error("Failed to save customers");
     throw err;
@@ -29,7 +29,7 @@ export const getCustomerById = async (id: string) => {
 
 export const putCustomer = async (id: number, value: any) => {
   try {
-    await api.put(`/customers/${id}`, value);
+    await api.put(`api/customers/${id}`, value);
   } catch (err) {
     console.error("Failed to update customers");
     throw err;
@@ -38,7 +38,7 @@ export const putCustomer = async (id: number, value: any) => {
 
 export const removeCustomer = async (id: number) => {
   try {
-    await api.delete(`/customers/${id}`);
+    await api.delete(`api/customers/${id}`);
   } catch (err) {
     console.error("Failed to delete customer");
     throw err;
