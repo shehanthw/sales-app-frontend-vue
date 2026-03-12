@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-50 text-gray-900">
     <nav
-      v-if="$route.name !== 'Login'"
+      v-if="$route.name !== 'Login' && $route.name !== 'Register'"
       class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-gray-200 z-50"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6">
@@ -149,7 +149,7 @@
     </nav>
 
     <main
-      :class="['min-h-screen', $route.name !== 'Login' ? 'pt-20 pb-10' : '']"
+      :class="['min-h-screen', $route.name !== 'Login' && $route.name !== 'Register' ? 'pt-20 pb-10' : '']"
     >
       <router-view v-slot="{ Component }">
         <transition name="fade" mode="out-in">

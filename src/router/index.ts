@@ -3,6 +3,7 @@ import {
   createWebHistory,
   type RouteRecordRaw,
 } from "vue-router";
+import { healthCheck } from "../api/auth";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -26,7 +27,7 @@ const routes: Array<RouteRecordRaw> = [
     path: "/customers",
     name: "Customers",
     component: () => import("../views/CustomersView.vue"),
-    meta: { requiresAuth: true }, // Protect it with your existing guard!
+    meta: { requiresAuth: true },
   },
   {
     path: "/products",
@@ -53,4 +54,21 @@ const router = createRouter({
   routes,
 });
 
+router.beforeEach(async (to, _from, next) => {
+    const isAuthenticated = await healthCheck();
+
+    // Check if the page we are going to HAS 'requiresAuth: true'
+    const routeRequiresAuth = to.matched.some(record => record.meta.requiresAuth);
+
+    if (routeRequiresAuth && !isAuthenticated) {
+        // User tried to go to a private page but isn't logged in
+        next({ name: "Login" });
+    } else {
+        // Page is public OR user is logged in
+        next();
+    }
+});
+
 export default router;
+
+
