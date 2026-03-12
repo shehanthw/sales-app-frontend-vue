@@ -322,7 +322,6 @@ const props = defineProps<{
 }>();
 
 const finalBalance = ref(0);
-const showUpdateCollectorBtn = ref(false);
 
 const emit = defineEmits(["save", "cancel"]);
 
