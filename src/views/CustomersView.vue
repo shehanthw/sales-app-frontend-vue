@@ -106,8 +106,8 @@ const form = ref<Customer>({
   phone: "",
   nic: "",
   address: "",
-  latitude: "",
-  longitude: "",
+  latitude: 0,
+  longitude: 0,
 });
 
 // --- COMPUTED (The Funnel) ---
@@ -156,11 +156,10 @@ const saveCustomer = async () => {
   try {
     if (editingId.value) {
       await putCustomer(editingId.value, form.value);
-      alert("Customer updated successfully!")
-      
+      alert("Customer updated successfully!");
     } else {
       await postCustomer(form.value);
-      alert("New customer created successfully!")
+      alert("New customer created successfully!");
     }
     resetForm();
     await fetchCustomers();
@@ -193,6 +192,8 @@ const deleteCustomer = async (id: number) => {
 
 const getLocation = () => {
   if (!navigator.geolocation) {
+    form.value.latitude = 0;
+      form.value.longitude = 0;
     locationError.value = true;
     locationMessage.value = "Geolocation not supported";
     return;
@@ -200,8 +201,8 @@ const getLocation = () => {
   gettingLocation.value = true;
   navigator.geolocation.getCurrentPosition(
     (position) => {
-      form.value.latitude = position.coords.latitude.toString();
-      form.value.longitude = position.coords.longitude.toString();
+      form.value.latitude = Number(position.coords.latitude.toString());
+      form.value.longitude = Number(position.coords.longitude.toString());
       locationMessage.value = "Location captured!";
       gettingLocation.value = false;
     },
@@ -220,8 +221,8 @@ const resetForm = () => {
     phone: "",
     nic: "",
     address: "",
-    latitude: "",
-    longitude: "",
+    latitude: 0,
+    longitude: 0,
   };
   editingId.value = null;
   locationMessage.value = "";
