@@ -58,6 +58,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import api from '../api/api';
+import { register } from '../api/auth';
 
 const email = ref('');
 const name = ref('');
@@ -79,7 +80,7 @@ const handleRegister = async () => {
 
   loading.value = true;
   try {
-    await api.post('/auth/register', {
+    await register({
       name: name.value,
       role: role.value,
       nic: nic.value,
@@ -88,12 +89,12 @@ const handleRegister = async () => {
       is_verified: false,
       email: email.value,
       password: password.value
-    });
+    })
 
     alert("User registered successfully!")
   } catch (err: any) {
     error.value = err.response?.data?.detail || "Registration failed. Try a different email.";
-    alert("Error in user registration!")
+    alert(err.response?.data?.detail)
   } finally {
     loading.value = false;
   }
