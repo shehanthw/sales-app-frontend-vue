@@ -188,7 +188,9 @@ const handleLogin = async () => {
     await login(formData);
     router.push("/");
   } catch (err: any) {
-    errorMessage.value = err.response?.data?.detail || "Invalid email or password";
+    const message = err.response?.data?.detail || "Invalid email or password";
+    errorMessage.value = message;
+    alert(message)
   } finally {
     isSubmitting.value = false;
   }

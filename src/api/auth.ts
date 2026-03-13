@@ -1,4 +1,5 @@
 import router from "../router";
+import type { User } from "../types/auth";
 import api from "./api";
 
 export const logout = async () => {
@@ -18,7 +19,15 @@ export const login = async (formData: FormData) => {
       },
     });
   } catch (err) {
-    console.error("Login failed", err);
+    throw err; 
+  }
+};
+
+export const register = async (formData: User) => {
+  try {
+    await api.post("api/auth/register", formData);
+  } catch (err) {
+    throw err; 
   }
 };
 
