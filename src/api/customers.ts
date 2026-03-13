@@ -11,6 +11,11 @@ export const getAllCustomers = async () => {
 
 export const postCustomer = async (value: any) => {
   try {
+    
+    if(!value.latitude && !value.longitude) {
+      value.latitude = 0;
+      value.longitude = 0;
+    }
     await api.post("api/customers", value);
   } catch (err) {
     console.error("Failed to save customers");
