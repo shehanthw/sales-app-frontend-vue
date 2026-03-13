@@ -57,7 +57,6 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import api from '../api/api';
 import { register } from '../api/auth';
 
 const email = ref('');
